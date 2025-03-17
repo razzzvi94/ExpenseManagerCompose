@@ -1,3 +1,28 @@
 <resources>
-    <string name="app_name">ExpenseManagerCompose</string>
+    <string name="app_name">Expense Manager</string>
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="str_spend_with_brain">Spend with brain</string>
+    <string name="str_forgot_password">Forgot your password?</string>
+    <string name="str_register">Register</string>
+    <string name="str_no_account">Have no account?</string>
+    <string name="str_more_about_you">Let us know more about you</string>
+    <string name="str_login">Login</string>
+    <string name="str_name">Name</string>
+    <string name="str_your_name">Your Name</string>
+    <string name="str_email">Email</string>
+    <string name="str_password">Password</string>
+    <string name="str_my_email">My email</string>
+    <string name="str_enter_credentials">Enter your credentials to become again active </string>
+    <string name="str_my_budget">My Budget</string>
+    <string name="str_base_information">Base information</string>
+    <string name="str_current_balance">Current balance</string>
+    <string name="str_today_expenses">Today expenses</string>
+    <string name="str_week_expenses">This week expenses</string>
+    <string name="str_month_expenses">This month expenses</string>
+    <string name="str_details">Details</string>
+    <string name="str_positive_balance">Positive balance</string>
+    <string name="str_negative_balance">Negative balance</string>
+    <string name="str_budget">Budget</string>
+    <string name="str_expenses">Expenses</string>
 </resources>

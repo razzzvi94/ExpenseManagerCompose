@@ -21,10 +21,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -34,6 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensemanagercompose.R
 import com.example.expensemanagercompose.ui.screens.addAction.CustomTextField
 import com.example.expensemanagercompose.ui.theme.BlackText
@@ -52,8 +51,10 @@ class LoginActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ExpenseManagerComposeTheme {
+                val viewModel: LoginViewModel = hiltViewModel()
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoginScreen(modifier = Modifier.padding(innerPadding))
+                    LoginScreen(modifier = Modifier.padding(innerPadding), viewModel)
                 }
             }
         }
@@ -61,7 +62,7 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun LoginScreen(modifier: Modifier = Modifier, viewModel: LoginViewModel) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -72,7 +73,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
     ) {
         AppLogo()
         LoginMessage()
-        UserInputFields()
+        UserInputFields(viewModel)
         RegisterButton()
         ForgotPasswordText()
         LoginPrompt()
@@ -100,10 +101,10 @@ fun LoginMessage() {
 }
 
 @Composable
-fun UserInputFields() {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+fun UserInputFields(viewModel: LoginViewModel) {
+    val userName by viewModel.userName.collectAsState()
+    val userEmail by viewModel.userEmail.collectAsState()
+    val userPassword by viewModel.userPassword.collectAsState()
 
     Column(
         modifier = Modifier
@@ -112,19 +113,19 @@ fun UserInputFields() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         CustomTextField(
-            value = name,
-            onValueChange = { name = it },
+            value = userName,
+            onValueChange = { viewModel.onUserNameChange(it) },
             label = "Name",
             keyboardType = KeyboardType.Text
         )
         CustomTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = userEmail,
+            onValueChange = { viewModel.onUserEmailChange(it) },
             label = "Email", keyboardType = KeyboardType.Email
         )
         CustomTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = userPassword,
+            onValueChange = { viewModel.onUserPasswordChange(it) },
             label = "Password",
             keyboardType = KeyboardType.Password
         )
@@ -187,6 +188,7 @@ fun LoginPrompt() {
 @Composable
 fun LoginActivityPreview() {
     ExpenseManagerComposeTheme {
-        LoginScreen()
+        val viewModel: LoginViewModel = hiltViewModel()
+        LoginScreen(modifier = Modifier, viewModel)
     }
 }

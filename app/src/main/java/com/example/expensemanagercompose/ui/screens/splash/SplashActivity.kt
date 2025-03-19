@@ -28,7 +28,7 @@ class SplashActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ExpenseManagerComposeTheme {
-                val viewModel: SplashScreenViewModel = hiltViewModel()
+                val viewModel: SplashViewModel = hiltViewModel()
                 val navigateToHome by viewModel.navigateToHome.collectAsState()
                 val navigateToLogin by viewModel.navigateToLogin.collectAsState()
 

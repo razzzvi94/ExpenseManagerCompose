@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SplashScreenViewModel @Inject constructor() : ViewModel() {
+class SplashViewModel @Inject constructor() : ViewModel() {
     private val _navigateToHome = MutableStateFlow(false)
     val navigateToHome: StateFlow<Boolean> = _navigateToHome
 

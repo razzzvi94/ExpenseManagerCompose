@@ -1,11 +1,14 @@
 package com.example.expensemanagercompose.ui.screens.login
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,8 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -44,6 +49,8 @@ import com.example.expensemanagercompose.ui.theme.space_8dp
 import com.example.expensemanagercompose.ui.theme.space_98dp
 import com.example.expensemanagercompose.ui.theme.textSize_16sp
 import com.example.expensemanagercompose.ui.theme.textSize_18sp
+import com.example.expensemanagercompose.utils.hide
+import com.example.expensemanagercompose.utils.show
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,11 +79,11 @@ fun LoginScreen(modifier: Modifier = Modifier, viewModel: LoginViewModel) {
         verticalArrangement = Arrangement.Center
     ) {
         AppLogo()
-        LoginMessage()
+        LoginMessage(viewModel)
         UserInputFields(viewModel)
-        RegisterButton()
-        ForgotPasswordText()
-        LoginPrompt()
+        RegisterButton(viewModel)
+        ForgotPasswordText(viewModel)
+        LoginPrompt(viewModel)
     }
 }
 
@@ -90,18 +97,25 @@ fun AppLogo() {
 }
 
 @Composable
-fun LoginMessage() {
+fun LoginMessage(viewModel: LoginViewModel) {
+    val isLogin by viewModel.isLogin.collectAsState()
+
     Text(
         modifier = Modifier.padding(0.dp, 45.dp, 0.dp, 0.dp),
         color = BlackText,
         fontSize = textSize_18sp,
         textAlign = TextAlign.Center,
-        text = "Enter your credentials to become again active"
+        text = if (isLogin) {
+            "Enter your credentials to become again active"
+        } else {
+            "Let us know more about you"
+        }
     )
 }
 
 @Composable
 fun UserInputFields(viewModel: LoginViewModel) {
+    val isLogin by viewModel.isLogin.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val userEmail by viewModel.userEmail.collectAsState()
     val userPassword by viewModel.userPassword.collectAsState()
@@ -113,6 +127,11 @@ fun UserInputFields(viewModel: LoginViewModel) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         CustomTextField(
+            modifier = if (isLogin) {
+                Modifier.hide()
+            } else {
+                Modifier.show()
+            },
             value = userName,
             onValueChange = { viewModel.onUserNameChange(it) },
             label = "Name",
@@ -133,15 +152,24 @@ fun UserInputFields(viewModel: LoginViewModel) {
 }
 
 @Composable
-fun RegisterButton() {
+fun RegisterButton(viewModel: LoginViewModel) {
+    val context = LocalContext.current
+    val isLogin by viewModel.isLogin.collectAsState()
+
     Button(
-        onClick = { },
+        onClick = {
+            Toast.makeText(context, "Button click!", Toast.LENGTH_LONG).show()
+        },
         modifier = Modifier.size(width = 176.dp, height = 45.dp),
         colors = ButtonDefaults.buttonColors(OrangeText),
         shape = RoundedCornerShape(space_8dp)
     ) {
         Text(
-            text = "Register",
+            text = if (isLogin) {
+                "Login"
+            } else {
+                "Register"
+            },
             color = WhiteText,
             fontSize = textSize_18sp,
             fontFamily = FontFamily(Font(R.font.montserrat_regular)),
@@ -150,9 +178,13 @@ fun RegisterButton() {
 }
 
 @Composable
-fun ForgotPasswordText() {
+fun ForgotPasswordText(viewModel: LoginViewModel) {
+    val isLogin by viewModel.isLogin.collectAsState()
+
     Text(
-        modifier = Modifier.padding(0.dp, 53.dp, 0.dp, 0.dp),
+        modifier = Modifier
+            .padding(0.dp, 53.dp, 0.dp, 0.dp)
+            .then(if (isLogin) Modifier.show() else Modifier.hide()),
         color = OrangeText,
         fontSize = textSize_16sp,
         textAlign = TextAlign.Center,
@@ -161,7 +193,9 @@ fun ForgotPasswordText() {
 }
 
 @Composable
-fun LoginPrompt() {
+fun LoginPrompt(viewModel: LoginViewModel) {
+    val isLogin by viewModel.isLogin.collectAsState()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -172,14 +206,25 @@ fun LoginPrompt() {
             color = BlackText,
             fontSize = textSize_16sp,
             textAlign = TextAlign.Center,
-            text = "Have already an account?"
+            text = if (isLogin) {
+                "Have no account?"
+            } else {
+                "Have already an account?"
+            }
         )
         Spacer(modifier = Modifier.width(30.dp))
         Text(
+            modifier = Modifier.clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }) { viewModel.onLoginChange() },
             color = OrangeText,
             fontSize = textSize_16sp,
             textAlign = TextAlign.Center,
-            text = "Login"
+            text = if (isLogin) {
+                "Register"
+            } else {
+                "Login"
+            }
         )
     }
 }

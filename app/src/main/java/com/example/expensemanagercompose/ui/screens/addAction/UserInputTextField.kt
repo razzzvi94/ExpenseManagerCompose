@@ -30,8 +30,7 @@ fun CustomTextField(
     TextField(
         modifier = modifier
             .fillMaxWidth()
-            .height(height)
-            .padding(horizontal = 24.dp),
+            .height(height),
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },

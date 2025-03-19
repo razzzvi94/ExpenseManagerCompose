@@ -37,6 +37,7 @@ val space_84dp: Dp = 84.dp
 val space_88dp: Dp = 88.dp
 val space_92dp: Dp = 92.dp
 val space_96dp: Dp = 96.dp
+val space_98dp: Dp = 98.dp
 val space_100dp: Dp = 100.dp
 val space_144dp: Dp = 144.dp
 val space_152dp: Dp = 152.dp

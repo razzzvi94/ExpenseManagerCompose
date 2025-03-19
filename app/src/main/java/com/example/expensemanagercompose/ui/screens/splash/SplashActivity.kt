@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensemanagercompose.R
+import com.example.expensemanagercompose.ui.screens.login.LoginActivity
 import com.example.expensemanagercompose.ui.screens.main.MainActivity
 import com.example.expensemanagercompose.ui.theme.ExpenseManagerComposeTheme
 
@@ -29,8 +30,7 @@ class SplashActivity : ComponentActivity() {
             ExpenseManagerComposeTheme {
                 val viewModel: SplashScreenViewModel = hiltViewModel()
                 val navigateToHome by viewModel.navigateToHome.collectAsState()
-
-                navigateToMainActivity(navigateToHome)
+                val navigateToLogin by viewModel.navigateToLogin.collectAsState()
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     FullscreenSplash(
@@ -38,6 +38,9 @@ class SplashActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
+
+                //navigateToMainActivity(navigateToHome)
+                navigateToLoginActivity(navigateToLogin)
             }
         }
     }
@@ -47,6 +50,17 @@ class SplashActivity : ComponentActivity() {
         LaunchedEffect(navigateToHome) {
             if (navigateToHome) {
                 val intent = Intent(this@SplashActivity, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        }
+    }
+
+    @Composable
+    private fun navigateToLoginActivity(navigateToLogin: Boolean) {
+        LaunchedEffect(navigateToLogin) {
+            if (navigateToLogin) {
+                val intent = Intent(this@SplashActivity, LoginActivity::class.java)
                 startActivity(intent)
                 finish()
             }

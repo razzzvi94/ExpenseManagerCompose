@@ -1,8 +1,7 @@
-package com.example.expensemanagercompose.ui.screens.addAction
+package com.example.expensemanagercompose.ui.appviews
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text

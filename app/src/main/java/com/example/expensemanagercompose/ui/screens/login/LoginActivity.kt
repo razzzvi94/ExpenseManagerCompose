@@ -38,7 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensemanagercompose.R
-import com.example.expensemanagercompose.ui.screens.addAction.CustomTextField
+import com.example.expensemanagercompose.ui.appviews.CustomTextField
 import com.example.expensemanagercompose.ui.screens.main.MainActivity
 import com.example.expensemanagercompose.ui.theme.BlackText
 import com.example.expensemanagercompose.ui.theme.ExpenseManagerComposeTheme

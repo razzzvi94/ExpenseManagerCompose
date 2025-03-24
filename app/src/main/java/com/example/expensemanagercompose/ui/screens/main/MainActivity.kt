@@ -1,43 +1,57 @@
 package com.example.expensemanagercompose.ui.screens.main
 
+import android.app.Activity
+import android.graphics.Color.BLACK
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.expensemanagercompose.R
 import com.example.expensemanagercompose.data.BottomBarItem
+import com.example.expensemanagercompose.data.DrawerItem
 import com.example.expensemanagercompose.data.Screens
 import com.example.expensemanagercompose.ui.screens.budget.Budget
+import com.example.expensemanagercompose.ui.screens.converter.Converter
 import com.example.expensemanagercompose.ui.screens.expenses.Expenses
+import com.example.expensemanagercompose.ui.theme.BlackText
 import com.example.expensemanagercompose.ui.theme.ExpenseManagerComposeTheme
 import com.example.expensemanagercompose.ui.theme.GreenBackground
-import com.example.expensemanagercompose.ui.theme.OrangeText
-import com.example.expensemanagercompose.ui.theme.WhiteText
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,96 +59,124 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ExpenseManagerComposeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainActivityContent(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                MainScreen()
             }
         }
     }
 }
 
 @Composable
-fun MainActivityContent(modifier: Modifier = Modifier) {
-    MainBottomAppBar()
-}
+fun MainScreen() {
+    val view = LocalView.current
+    val window = (view.context as Activity).window
 
-@Composable
-fun MainBottomAppBar() {
-    val navigationController = rememberNavController()
-    val selected = remember { mutableIntStateOf(R.drawable.ic_budget) }
+    SideEffect {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = BLACK
 
-    val items = listOf(
+        WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = false
+    }
+
+    val navController = rememberNavController()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val bottomBarItems = listOf(
         BottomBarItem("Budget", R.drawable.ic_budget, Screens.Budget.screen),
         BottomBarItem("Expenses", R.drawable.ic_expenses, Screens.Expenses.screen)
     )
 
-    Scaffold(
-        bottomBar = {
-            BottomAppBar(containerColor = GreenBackground) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    items.forEach { item ->
-                        BottomNavItem(
-                            item = item,
-                            isSelected = selected.intValue == item.iconRes,
-                            onClick = {
-                                selected.intValue = item.iconRes
-                                navigationController.navigate(item.screen) {
+    val drawerItems = listOf(
+        DrawerItem("Main page", Icons.Default.Home, Screens.Budget.screen),
+        DrawerItem("Converter", Icons.Default.Star, Screens.Converter.screen),
+        DrawerItem("Logout", Icons.AutoMirrored.Filled.ExitToApp, null)
+    )
+
+    val selectedBottom = remember { mutableIntStateOf(R.drawable.ic_budget) }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = true,
+        drawerContent = {
+            ModalDrawerSheet(
+                modifier = Modifier.statusBarsPadding()
+            ) {
+                DrawerHeader()
+                HorizontalDivider()
+
+                drawerItems.forEach { item ->
+                    NavigationDrawerItem(
+                        label = { Text(text = item.label, color = BlackText) },
+                        selected = false,
+                        icon = {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                tint = BlackText
+                            )
+                        },
+                        onClick = {
+                            coroutineScope.launch { drawerState.close() }
+                            item.screen?.let {
+                                navController.navigate(it) {
                                     popUpTo(0)
                                 }
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                            } ?: Toast.makeText(context, "Logout", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                    HorizontalDivider()
                 }
             }
         }
-    ) { paddingValues ->
-        NavHost(
-            navController = navigationController,
-            startDestination = Screens.Budget.screen,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable(Screens.Budget.screen) { Budget() }
-            composable(Screens.Expenses.screen) { Expenses() }
-        }
-    }
-}
-
-@Composable
-fun BottomNavItem(
-    item: BottomBarItem,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            painter = painterResource(id = item.iconRes),
-            contentDescription = null,
-            modifier = Modifier.size(26.dp),
-            tint = if (isSelected) OrangeText else WhiteText
-        )
-        Text(
-            text = item.label,
-            fontFamily = FontFamily(Font(R.font.montserrat_regular)),
-            color = if (isSelected) OrangeText else WhiteText,
-            modifier = Modifier.padding(top = 4.dp)
-        )
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
+            topBar = {
+                TopBar(onMenuClick = {
+                    coroutineScope.launch { drawerState.open() }
+                })
+            },
+            bottomBar = {
+                BottomAppBar(
+                    containerColor = GreenBackground,
+                    modifier = Modifier.navigationBarsPadding()
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        bottomBarItems.forEach { item ->
+                            BottomNavItem(
+                                item = item,
+                                isSelected = selectedBottom.intValue == item.iconRes,
+                                onClick = {
+                                    selectedBottom.intValue = item.iconRes
+                                    navController.navigate(item.screen) {
+                                        popUpTo(0)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
+        ) { paddingValues ->
+            NavHost(
+                navController = navController,
+                startDestination = Screens.Budget.screen,
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                composable(Screens.Budget.screen) { Budget() }
+                composable(Screens.Expenses.screen) { Expenses() }
+                composable(Screens.Converter.screen) { Converter() }
+            }
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun MainActivityPreview() {
-    ExpenseManagerComposeTheme {
-        MainActivityContent()
-    }
+    ExpenseManagerComposeTheme { MainScreen() }
 }

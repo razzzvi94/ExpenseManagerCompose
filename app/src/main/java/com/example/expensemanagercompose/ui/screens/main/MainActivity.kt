@@ -7,6 +7,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,12 +32,17 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
@@ -72,9 +79,11 @@ fun MainScreen() {
 
     SideEffect {
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = BLACK
-
-        WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = false
+        window.statusBarColor = Color.Black.toArgb()
+        WindowInsetsControllerCompat(window, view).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
     }
 
     val navController = rememberNavController()
@@ -93,39 +102,84 @@ fun MainScreen() {
         DrawerItem("Logout", Icons.AutoMirrored.Filled.ExitToApp, null)
     )
 
-    val selectedBottom = remember { mutableIntStateOf(R.drawable.ic_budget) }
+    val selectedBottom = remember { mutableStateOf<Int?>(R.drawable.ic_budget) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         gesturesEnabled = true,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.statusBarsPadding()
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .navigationBarsPadding(),
+                drawerShape = RectangleShape,
+                drawerContainerColor = Color.White
             ) {
-                DrawerHeader()
-                HorizontalDivider()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 0.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        DrawerHeader()
+                        HorizontalDivider()
 
-                drawerItems.forEach { item ->
-                    NavigationDrawerItem(
-                        label = { Text(text = item.label, color = BlackText) },
-                        selected = false,
-                        icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.label,
-                                tint = BlackText
+                        drawerItems.filter { it.label != "Logout" }.forEach { item ->
+                            NavigationDrawerItem(
+                                label = { Text(text = item.label, color = BlackText) },
+                                selected = false,
+                                icon = {
+                                    Icon(
+                                        imageVector = item.icon,
+                                        contentDescription = item.label,
+                                        tint = BlackText
+                                    )
+                                },
+                                onClick = {
+                                    coroutineScope.launch { drawerState.close() }
+
+                                    item.screen?.let { screen ->
+                                        selectedBottom.value = when (screen) {
+                                            Screens.Budget.screen -> R.drawable.ic_budget
+                                            Screens.Expenses.screen -> R.drawable.ic_expenses
+                                            else -> null
+                                        }
+
+                                        navController.navigate(screen) {
+                                            popUpTo(0)
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             )
-                        },
-                        onClick = {
-                            coroutineScope.launch { drawerState.close() }
-                            item.screen?.let {
-                                navController.navigate(it) {
-                                    popUpTo(0)
-                                }
-                            } ?: Toast.makeText(context, "Logout", Toast.LENGTH_SHORT).show()
+                            HorizontalDivider()
                         }
-                    )
-                    HorizontalDivider()
+                    }
+
+                    val logoutItem = drawerItems.find { it.label == "Logout" }
+                    logoutItem?.let { item ->
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
+                        ) {
+                            NavigationDrawerItem(
+                                label = { Text(text = item.label, color = BlackText) },
+                                selected = false,
+                                icon = {
+                                    Icon(
+                                        imageVector = item.icon,
+                                        contentDescription = item.label,
+                                        tint = BlackText
+                                    )
+                                },
+                                onClick = {
+                                    coroutineScope.launch { drawerState.close() }
+                                    Toast.makeText(context, "Logout", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -148,9 +202,9 @@ fun MainScreen() {
                         bottomBarItems.forEach { item ->
                             BottomNavItem(
                                 item = item,
-                                isSelected = selectedBottom.intValue == item.iconRes,
+                                isSelected = selectedBottom.value == item.iconRes,
                                 onClick = {
-                                    selectedBottom.intValue = item.iconRes
+                                    selectedBottom.value = item.iconRes
                                     navController.navigate(item.screen) {
                                         popUpTo(0)
                                     }

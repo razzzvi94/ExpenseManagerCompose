@@ -1,7 +1,6 @@
 package com.example.expensemanagercompose.ui.screens.main
 
 import android.app.Activity
-import android.graphics.Color.BLACK
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -31,7 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -47,6 +46,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.expensemanagercompose.R
 import com.example.expensemanagercompose.data.BottomBarItem
@@ -184,14 +184,27 @@ fun MainScreen() {
             }
         }
     ) {
+
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+        val topBarTitle = when (currentRoute) {
+            Screens.Budget.screen -> "Budget"
+            Screens.Expenses.screen -> "Expenses"
+            Screens.Converter.screen -> "Converter"
+            else -> "Expense Manager"
+        }
+
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding(),
             topBar = {
-                TopBar(onMenuClick = {
-                    coroutineScope.launch { drawerState.open() }
-                })
+                TopBar(
+                    title = topBarTitle,
+                    onMenuClick = {
+                        coroutineScope.launch { drawerState.open() }
+                    }
+                )
             },
             bottomBar = {
                 BottomAppBar(

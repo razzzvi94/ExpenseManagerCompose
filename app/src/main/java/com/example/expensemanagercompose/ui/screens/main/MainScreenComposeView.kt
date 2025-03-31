@@ -75,9 +75,9 @@ fun DrawerHeader() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(onMenuClick: () -> Unit) {
+fun TopBar(title: String, onMenuClick: () -> Unit) {
     TopAppBar(
-        title = { Text(text = "Window Title") },
+        title = { Text(text = title) },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = WhiteText,
             titleContentColor = BlackText,
